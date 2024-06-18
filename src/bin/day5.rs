@@ -21,8 +21,8 @@ fn day5(arr: &mut Vec<i32>) {
 
 	loop {
 		let op_code = arr[i] % 100;
-        let param1 = arr[i] / 100 % 1000;
-        let param2 = arr[i] / 1000 % 10000;
+        let param1 = arr[i] / 100 % 10;
+        let param2 = arr[i] / 1000 % 10;
         let param3 = arr[i] / 10000;
 		if op_code == 99 {
 			break;
