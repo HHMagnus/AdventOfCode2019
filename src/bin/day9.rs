@@ -4,9 +4,13 @@ fn main() {
     let file = read_to_string("input/day9.txt").unwrap();
     let orr_vec = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
 
-    let mut vec = orr_vec.clone();
     println!("Day 9 part 1:");
+    let mut vec = orr_vec.clone();
     day9(&mut vec, 1);
+
+	println!("Day 9 part 2:");
+    let mut vec = orr_vec.clone();
+    day9(&mut vec, 2);
 }
 
 fn pos(param: i64, arg: i64, relative_base: i64) -> usize {
