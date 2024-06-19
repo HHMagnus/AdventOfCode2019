@@ -12,8 +12,27 @@ fn main() {
     let orr_vec = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
 
     let mut vec = orr_vec.clone();
-    let part1 = day11(&mut vec);
+    let part1 = day11(&mut vec, false).len();
     println!("Day 11 part 1: {}", part1);
+
+    let mut vec = orr_vec.clone();
+	let whites = day11(&mut vec, true);
+	let miny = *whites.iter().map(|(_, y)| y).min().unwrap();
+	let maxy = *whites.iter().map(|(_, y)| y).max().unwrap();
+	let minx = *whites.iter().map(|(x, _)| x).min().unwrap();
+	let maxx = *whites.iter().map(|(x, _)| x).max().unwrap();
+
+    println!("Day 11 part 2:");
+	for y in miny..=maxy {
+		for x in minx..maxx {
+			if whites.contains(&(x, y)) {
+				print!("#");
+			} else {
+				print!(".");
+			}
+		}
+		println!("");
+	}
 }
 
 fn pos(param: i64, arg: i64, relative_base: i64) -> usize {
@@ -48,13 +67,16 @@ fn store(pos: usize, result: i64, arr: &mut Vec<i64>) {
 	arr[pos] = result;
 }
 
-fn day11(arr: &mut Vec<i64>) -> usize {
+fn day11(arr: &mut Vec<i64>, part2: bool) -> HashSet<(i32, i32)> {
 	let mut i = 0;
     let mut relative_base = 0;
 
 	let mut robot = (0, 0);
 	let mut dir = Dir::Up;
 	let mut whites = HashSet::new();
+	if part2 {
+		whites.insert((0, 0));
+	}
 	let mut painted = HashSet::new();
 
 	let mut paint = true;
@@ -65,7 +87,7 @@ fn day11(arr: &mut Vec<i64>) -> usize {
         let param2 = (arr[i] / 1000) % 10;
         let param3 = arr[i] / 10000 % 10;
 		if op_code == 99 {
-			return painted.len();
+			return if part2 { whites } else { painted };
 		}
 
 		match op_code {
