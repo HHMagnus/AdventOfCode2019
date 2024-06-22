@@ -5,11 +5,14 @@ fn main() {
     let orr_vec = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
 
     let mut vec = orr_vec.clone();
-    let part1arr = day13(&mut vec);
-	let part1 = part1arr.into_iter().as_slice().chunks(3).filter(|x| x[2] == 2).count();
+    let part1 = day13(&mut vec, false);
 	println!("Day 13 part 1: {}", part1);
 
 	let mut vec = orr_vec.clone();
+	vec[0] = 2;
+    let part2 = day13(&mut vec, true);
+	println!("Day 13 part 2: {}", part2);
+
 }
 
 fn pos(param: i64, arg: i64, relative_base: i64) -> usize {
@@ -44,7 +47,7 @@ fn store(pos: usize, result: i64, arr: &mut Vec<i64>) {
 	arr[pos] = result;
 }
 
-fn day13(arr: &mut Vec<i64>) -> Vec<i64>{
+fn day13(arr: &mut Vec<i64>, part2: bool) -> i64 {
 	let mut i = 0;
     let mut relative_base = 0;
 
@@ -56,7 +59,10 @@ fn day13(arr: &mut Vec<i64>) -> Vec<i64>{
         let param2 = (arr[i] / 1000) % 10;
         let param3 = arr[i] / 10000 % 10;
 		if op_code == 99 {
-			return outputs;
+			if part2 {
+				return outputs.into_iter().as_slice().chunks(3).filter(|x| x[0] == -1 && x[1] == 0).map(|x| x[2]).max().unwrap();
+			}
+			return outputs.into_iter().as_slice().chunks(3).filter(|x| x[2] == 2).count() as i64;
 		}
 
 		match op_code {
@@ -76,7 +82,10 @@ fn day13(arr: &mut Vec<i64>) -> Vec<i64>{
 			},
 			3 => {
 				let pos = pos(param1, arr[i+1], relative_base) as usize;
-				panic!("No input on day 13");
+				let paddle = outputs.iter().as_slice().chunks(3).rev().find(|x| x[2] == 3).unwrap()[0];
+				let ball = outputs.iter().as_slice().chunks(3).rev().find(|x| x[2] == 4).unwrap()[0];
+				let res = if ball < paddle { -1 } else if ball > paddle { 1 } else { 0 }; 
+				store(pos, res, arr);
 				i += 2;
 			},
 			4 => {
