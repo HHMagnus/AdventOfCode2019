@@ -25,6 +25,31 @@ fn main() {
 		(first, ((second[0].parse::<usize>().unwrap(), second[1])))
 	}).collect::<Vec<_>>();
 
+	let part1 = day14(input.clone(), 1);
+	println!("Day 14 part 1: {}", part1);
+
+	let mut min = 0;
+	let mut max = 1000000000000 as u128;
+
+	while min != max {
+		let mid = (max + min) / 2;
+		
+		let ore = day14(input.clone(), mid);
+
+		if ore > 1000000000000 {
+			max = mid - 1;
+		} else if ore < 1000000000000 {
+			min = mid + 1;
+		} else {
+			max = mid;
+			min = mid;
+		}
+	}
+
+	println!("Day 14 part 2: {}", min);
+}
+
+fn day14(input: Vec<(Vec<(usize, &str)>, (usize, &str))>, fuel: u128) -> u128 {
 	let mut dep_map = HashMap::new();
 
 	for i in &input {
@@ -33,7 +58,7 @@ fn main() {
 
 	let mut ore: u128 = 0;
 	let mut collection = HashMap::new();
-	collection.insert("FUEL", 1);
+	collection.insert("FUEL", fuel);
 
 	while let Some((&dep, _)) = dep_map.iter().find(|&x| !dep_map.iter().any(|y| y.1.contains(x.0)) && collection.contains_key(x.0)) {
 		dep_map = dep_map.into_iter().map(|x| (x.0, x.1.into_iter().filter(|&x| x != dep).collect())).collect();
@@ -56,5 +81,5 @@ fn main() {
 		}
 	}
 
-	println!("Day 14 part 1: {}", ore);
+	ore
 }
