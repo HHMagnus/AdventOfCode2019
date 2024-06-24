@@ -16,10 +16,7 @@ fn main() {
         }).collect();
     }
 
-    let part1 = part1.iter().map(|x| x.to_string()).collect::<Vec<_>>().join("");
+    let part1 = part1[..8].iter().map(|x| x.to_string()).collect::<Vec<_>>().join("");
 
     println!("Day 16 part 1: {}", part1);
-
-    // 16843933 too low
-
 }
