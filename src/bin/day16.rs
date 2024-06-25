@@ -12,7 +12,7 @@ fn main() {
     for _ in 0..100 {
         part1 = (0..part1.len()).into_iter().map(|p| {
             let value = part1.iter().enumerate().map(|(i, x)| input[((i+1) / (p+1)) % input.len()] * x).sum::<i64>();
-            value.to_string().chars().last().unwrap().to_digit(10).unwrap() as i64
+            value.abs() % 10
         }).collect();
     }
 
