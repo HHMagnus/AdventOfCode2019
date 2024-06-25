@@ -19,4 +19,20 @@ fn main() {
     let part1 = part1[..8].iter().map(|x| x.to_string()).collect::<Vec<_>>().join("");
 
     println!("Day 16 part 1: {}", part1);
+
+    let part2 = list.clone().repeat(10000);
+    let index = part2[..7].iter().map(|x| x.to_string()).collect::<Vec<_>>().join("").parse::<usize>().unwrap();
+    let mut part2 = part2[index..].to_vec();
+    
+    for _ in 0..100 {
+        let mut total = 0;
+        for i  in (0..part2.len()).rev() {
+            total += part2[i];
+            part2[i] = total % 10;
+        }
+    }
+
+    let part2 = part2[..8].iter().map(|x| x.to_string()).collect::<Vec<_>>().join("");
+
+    println!("Day 16 part 2: {}", part2);
 }
