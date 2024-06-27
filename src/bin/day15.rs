@@ -9,7 +9,11 @@ fn main() {
 	visited.insert((0,0));
 	queue.push_back((orr_vec, 0, 0, (0,0), 1));
 
-	'p1: while let Some(next) = queue.pop_front() {
+	let mut open_spaces = HashSet::new();
+	open_spaces.insert((0,0));
+	let mut part1 = (0, 0);
+
+	while let Some(next) = queue.pop_front() {
 		let changes = [
 			(1, (next.3.0, next.3.1 - 1)),
 			(2, (next.3.0, next.3.1 + 1)),
@@ -24,16 +28,45 @@ fn main() {
 			let (vec, i, rb, output) = day15(next.0.clone(), next.1, next.2, change.0);
 
 			if output == 2 {
+				part1 = change.1;
 				println!("Day 15 part 1: {}", next.4);
-				break 'p1;
+				continue;
 			}
 			else if output == 0 {
 				continue;
 			}
 
 			queue.push_back((vec, i, rb, change.1, next.4+1));
+			open_spaces.insert(change.1);
 		}
 	}
+
+	let mut i = 0;
+
+	let mut positions = vec![part1];
+
+	while !open_spaces.is_empty() {
+		let xs = positions;
+		positions = Vec::new();
+		i += 1;
+		for x in xs {
+			let change = [
+				(x.0, x.1+1),
+				(x.0, x.1-1),
+				(x.0+1, x.1),
+				(x.0-1, x.1),
+			];
+
+			for c in change {
+				if open_spaces.contains(&c) {
+					open_spaces.remove(&c);
+					positions.push(c);
+				}
+			}
+		}
+	}
+
+	println!("Day 15 part 2: {:?}", i);
 }
 
 fn pos(param: i64, arg: i64, relative_base: i64) -> usize {
