@@ -1,12 +1,39 @@
-use std::fs::read_to_string;
+use std::{collections::HashMap, fs::read_to_string};
 
 fn main() {
     let file = read_to_string("input/day19.txt").unwrap();
     let orr_vec = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
 
-    let vec = orr_vec.clone();
-	let part1 = (0..50).flat_map(|x| (0..50).map(move |y| (x, y))).map(|xy| day19(vec.clone(), xy)).filter(|&x| x == 1).count();
+	let part1 = (0..50).flat_map(|x| (0..50).map(move |y| (x, y))).map(|xy| day19(orr_vec.clone(), xy)).filter(|&x| x == 1).count();
     println!("Day 19 part 1: {}", part1);
+	
+	let part2 = part2(orr_vec);
+	let part2 = (part2.0 - 99, part2.1 - 99);
+	let part2 = part2.0 * 10000 + part2.1;
+	println!("Day 19 part 2: {}", part2);
+}
+
+fn part2(vec: Vec<i64>) -> (i64, i64) {
+	let mut curr = 0;
+
+	let mut map = HashMap::new();
+
+	loop {
+		for pos in (0..curr).map(|x| (x, curr)).chain((0..curr+1).map(|y| (curr, y))) {
+			let value = day19(vec.clone(), pos);
+			let res = value + map.get(&(pos.0, pos.1-1)).unwrap_or(&0) + map.get(&(pos.0-1, pos.1)).unwrap_or(&0) - map.get(&(pos.0-1, pos.1-1)).unwrap_or(&0);
+			map.insert(pos, res);
+
+			if pos.0 >= 100 && pos.1 >= 100 {
+				let area = res + map.get(&(pos.0 - 100, pos.1 - 100)).unwrap() - map.get(&(pos.0, pos.1 - 100)).unwrap() - map.get(&(pos.0 - 100, pos.1)).unwrap();
+				if area == 100*100 {
+					return pos;
+				}
+			}
+		}
+
+		curr += 1;
+	}
 }
 
 fn pos(param: i64, arg: i64, relative_base: i64) -> usize {
