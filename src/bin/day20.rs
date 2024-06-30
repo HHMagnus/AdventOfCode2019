@@ -28,6 +28,7 @@ fn main() {
 		portal_to.push((str, open));
 	}
 
+	// Part 1
 	let start = portal_to.iter().find(|x| x.0 == "AA").unwrap().1;
 	let mut queue = VecDeque::new();
 	let mut visited = BTreeSet::new();
@@ -58,6 +59,53 @@ fn main() {
 
 				let other_side = portal_to.iter().find(|(str, xy)| str == portal && xy != &next).unwrap();
 				queue.push_back((other_side.1, steps + 1));
+			}
+		}
+	}
+
+	// Part 2
+	let &maxx = open_spaces.iter().map(|(x, _)| x).max().unwrap();
+	let &maxy = open_spaces.iter().map(|(_, y)| y).max().unwrap();
+	let mut queue = VecDeque::new();
+	let mut visited = BTreeSet::new();
+	let start = (start.0, start.1, 0);
+	queue.push_back((start, 0));
+
+	'p2: while let Some((next, steps)) = queue.pop_front() {
+		if visited.contains(&next) {
+			continue;
+		}
+		visited.insert(next);
+		for neighbor in [(next.0 - 1, next.1), (next.0 + 1, next.1), (next.0, next.1 - 1), (next.0, next.1 + 1)] {
+			if open_spaces.contains(&neighbor) {
+				queue.push_back(((neighbor.0, neighbor.1, next.2), steps + 1));
+				continue;
+			}
+
+			if portal_from.contains_key(&neighbor) {
+				let portal = portal_from.get(&neighbor).unwrap();
+				if portal == "AA" {
+					continue;
+				}
+
+				if portal == "ZZ" {
+					if next.2 != 0 {
+						continue;
+					}
+					println!("Day 20 part 2: {}", steps);
+					break 'p2;
+				}
+
+				let other_side = portal_to.iter().find(|(str, xy)| str == portal && xy != &(next.0, next.1)).unwrap();
+				let outside_portal = !(other_side.1.0 <= 2 || other_side.1.0 >= maxx || other_side.1.1 <= 2 || other_side.1.1 >= maxy);
+
+				if outside_portal && next.2 == 0 {
+					continue;
+				}
+
+				let level = next.2 + if outside_portal { -1 } else { 1 };
+
+				queue.push_back(((other_side.1.0, other_side.1.1, level), steps + 1));
 			}
 		}
 	}
