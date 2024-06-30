@@ -1,6 +1,7 @@
 
 use std::{collections::{HashMap, VecDeque}, fs::read_to_string};
 
+#[derive(Clone, PartialEq, Eq)]
 struct Packet {
 	computer_id: i64,
 	x: i64,
@@ -42,6 +43,14 @@ impl Computer {
 		self.relative_base = rb;
 		Packet::construct(out)
 	}
+
+	fn refresh(&mut self) -> VecDeque<Packet> {
+		let (code, ip, rb, out) = day23(self.code.clone(), self.instruction_pointer, self.relative_base, vec![-1]);
+		self.code = code;
+		self.instruction_pointer = ip;
+		self.relative_base = rb;
+		Packet::construct(out)
+	}
 }
 
 impl Network {
@@ -59,7 +68,7 @@ impl Network {
 		}
 	}
 
-	fn run(&mut self) -> i64 {
+	fn run_part_1(&mut self) -> i64 {
 		while let Some(packet) = self.packets.pop_front() {
 			if packet.computer_id == 255 {
 				return packet.y;
@@ -70,17 +79,65 @@ impl Network {
 			self.packets.append(&mut packs);
 		}
 
-		unreachable!("No Y=255");
+		unreachable!("No dest=255");
+	}
+
+	fn refresh(&mut self) {
+		for ci in 0..50 {
+			let computer = self.computers.get_mut(&ci).unwrap();
+			let mut packets = computer.refresh();
+			self.packets.append(&mut packets);
+		}
+	}
+
+	fn run_part_2(&mut self) -> i64 {
+		let mut nats = Vec::new();
+		let mut nat: Option<Packet> = None;
+			
+		loop {
+			if self.packets.is_empty() {
+				self.refresh();
+				if !self.packets.is_empty() {
+					continue;
+				}
+			}
+
+			if self.packets.is_empty() {
+				let mut unwrapped = nat.unwrap();
+				if nats.contains(&unwrapped.y) {
+					return unwrapped.y;
+				}
+
+				unwrapped.computer_id = 0;
+				nats.push(unwrapped.y);
+				self.packets.push_back(unwrapped);
+				nat = None;
+			}
+
+			let packet = self.packets.pop_back().unwrap();
+			if packet.computer_id == 255 {
+				nat = Some(packet);
+				continue;
+			}
+
+			let computer = self.computers.get_mut(&packet.computer_id).unwrap();
+			let mut packs = computer.receive(packet);
+			self.packets.append(&mut packs);
+		}
 	}
 }
 
 fn main() {
     let file = read_to_string("input/day23.txt").unwrap();
-    let orr_vec = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
+    let code = file.split(",").map(|x| x.parse::<i64>().unwrap()).collect::<Vec<_>>();
 
-	let mut network = Network::new(orr_vec);
-	let part1 = network.run();
+	let mut network = Network::new(code.clone());
+	let part1 = network.run_part_1();
 	println!("Day 23 part 1: {:?}", part1);
+
+	let mut network = Network::new(code);
+	let part2 = network.run_part_2();
+	println!("Day 23 part 2: {:?}", part2);
 }
 
 
