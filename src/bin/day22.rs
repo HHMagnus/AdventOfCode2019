@@ -1,7 +1,8 @@
 
 use std::fs::read_to_string;
+use mod_exp::mod_exp;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum CardAction {
 	DealIntoNewStack,
 	Cut(i32),
@@ -25,7 +26,7 @@ fn main() {
 
 	let mut cards = (0..10007).into_iter().collect::<Vec<_>>();
 
-	for line in lines {
+	for line in lines.clone() {
 		match line {
 			CardAction::DealIntoNewStack => {
 				cards.reverse();
@@ -59,4 +60,33 @@ fn main() {
 
 	let part1 = cards.into_iter().enumerate().find(|(_, x)| x == &2019).unwrap().0;
 	println!("Day 22 part 1: {}", part1);
+
+	let deck_size = 119315717514047i128;
+	let times = 101741582076661i128;
+
+	let mut offset_diff = 0;
+	let mut increment_mul = 1;
+
+	for line in lines.clone() {
+		match line {
+			CardAction::DealIntoNewStack => {
+				increment_mul = -increment_mul;
+				offset_diff += increment_mul;
+			},
+			CardAction::Cut(x) => {
+				offset_diff += increment_mul * x as i128;
+			},
+			CardAction::DealWithIncrement(x) => {
+				increment_mul *= mod_exp(x as i128, deck_size-2, deck_size);
+			},
+		}
+		offset_diff %= deck_size;
+		increment_mul %= deck_size;
+	}
+
+	let increment = 2020 * mod_exp(increment_mul, times, deck_size) % deck_size;
+	let offset = offset_diff * ((1 - mod_exp(increment_mul, times, deck_size)) * mod_exp(1 - increment_mul, deck_size-2, deck_size) % deck_size);
+	let part2 = (offset + increment) % deck_size;
+	println!("Day 22 part 2: {}", part2);
+	// Explanation on reddit: https://www.reddit.com/r/adventofcode/comments/ee0rqi/comment/fbnkaju/
 }
